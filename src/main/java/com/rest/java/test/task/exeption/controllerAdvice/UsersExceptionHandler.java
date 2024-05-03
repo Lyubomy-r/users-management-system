@@ -8,12 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.sql.Timestamp;
 
 @ControllerAdvice
-public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
+public class UsersExceptionHandler  {
 
     Logger logger = LoggerFactory.getLogger(UsersExceptionHandler.class);
 
@@ -29,4 +28,5 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(response, exc.getHttpStatus());
     }
+
 }

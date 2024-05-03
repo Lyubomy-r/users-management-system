@@ -11,9 +11,8 @@ import java.sql.Timestamp;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ErrorResponse {
-
-        private int status;
-        private String message;
-        private Timestamp timeStamp;
+public class ViolationErrorResponse<T>  {
+    private int status;
+    private T messages;
+    private Timestamp timeStamp;
 }

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import javax.validation.Valid;
 import java.sql.Timestamp;
 import java.util.List;
@@ -64,13 +65,14 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<DataResponse<User>> createUser(@Valid @RequestBody User user) {
-        User newUser = userService.save(user);
-        userService.addLinksToEntityModel(newUser);
+            User newUser = userService.save(user);
+            userService.addLinksToEntityModel(newUser);
 
-        DataResponse<User> response = new DataResponse<>(newUser);
+            DataResponse<User> response = new DataResponse<>(newUser);
 
-        logger.info("From UsersController method -createUser- (/api/v1/users) return new User.");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+            logger.info("From UsersController method -createUser- (/api/v1/users) return new User.");
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+
     }
 
     @PatchMapping("/{userId}")

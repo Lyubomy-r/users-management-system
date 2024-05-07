@@ -1,13 +1,12 @@
 package com.rest.java.test.task.service;
 
 import com.rest.java.test.task.entity.User;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
-
-import java.util.List;
 
 public interface UserService {
 
-    List<User> findAll();
+    Page<User> findAll(int page, int size);
 
     User findById(Long id);
 
@@ -17,10 +16,20 @@ public interface UserService {
 
     void delete(Long id);
 
-    List<User> searchByBirthDateRange(String from,
+    Page<User> searchByBirthDateRange(int page,
+                                      int size,
+                                      String from,
                                       String to);
 
-    CollectionModel<User> addLinksCollectionModel(List<User> usersList);
+    CollectionModel<User> addLinksCollectionModel(Page<User> usersList,
+                                                  int page,
+                                                  int size);
+
+    CollectionModel<User> addLinksCollectionModelSearch(Page<User> usersList,
+                                                        int page,
+                                                        int size,
+                                                        String from,
+                                                        String to);
 
     void addLinksToEntityModel(User user);
 }

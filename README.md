@@ -28,11 +28,14 @@ their descriptions:
 
 ## showAllUsers
 
-http://ec2-52-59-208-61.eu-central-1.compute.amazonaws.com:8080/api/v1/users
+http://ec2-52-59-208-61.eu-central-1.compute.amazonaws.com:8080/api/v1/users?page=1&size=2
 
 - **Endpoint: /api/v1/users**
 - **Method:** GET
 - **Description:** Returns a list of all users.
+- **Parameters:**
+  - **page:** Path variable representing the number of the page with users. If you do not specify parameters, by default, you should start browsing from page 0.
+  - **size:** Path variable representing the size of the page. If you do not specify parameters, by default, the page size will be 4 by default.
 - **Returns: List\<User\>** containing all users.
 - **Logger Message:** Logs the retrieval of all users.
 
@@ -43,42 +46,66 @@ http://ec2-52-59-208-61.eu-central-1.compute.amazonaws.com:8080/api/v1/users
   "data": {
     "links": [
       {
-        "rel": "showAllUsers",
-        "href": "http://localhost:8080/api/v1/users"
+        "rel": "next",
+        "href": "http://localhost:8080/api/v1/users?page=2&size=3"
+      },
+      {
+        "rel": "previous",
+        "href": "http://localhost:8080/api/v1/users?page=0&size=3"
       }
     ],
     "content": [
       {
-        "id": 1,
-        "firstName": "Ronald",
+        "id": 4,
+        "firstName": "Bonald",
         "lastName": "Serous",
-        "email": "sewewt@code.com",
+        "email": "sewewtg@code.com",
         "birthDate": "2000-04-10",
         "address": "2194 Richmond Terrace Staten Island, NY  10302",
         "phoneNumber": "+130020050002",
         "links": [
           {
             "rel": "self",
-            "href": "http://localhost:8080/api/v1/users/1"
+            "href": "http://localhost:8080/api/v1/users/4"
           }
         ]
       },
       {
-        "id": 2,
-        "firstName": "Ronald",
+        "id": 5,
+        "firstName": "Conald",
         "lastName": "Serous",
-        "email": "sewewtw@code.com",
-        "birthDate": "2000-04-10",
+        "email": "sewewtjh@code.com",
+        "birthDate": "1990-04-10",
         "address": "2194 Richmond Terrace Staten Island, NY  10302",
         "phoneNumber": "+130020050002",
         "links": [
           {
             "rel": "self",
-            "href": "http://localhost:8080/api/v1/users/2"
+            "href": "http://localhost:8080/api/v1/users/5"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "firstName": "Donald",
+        "lastName": "Serous",
+        "email": "sewewtkj@code.com",
+        "birthDate": "1990-04-10",
+        "address": "2194 Richmond Terrace Staten Island, NY  10302",
+        "phoneNumber": "+130020050002",
+        "links": [
+          {
+            "rel": "self",
+            "href": "http://localhost:8080/api/v1/users/6"
           }
         ]
       }
     ]
+  },
+  "pagination": {
+    "page": 1,
+    "size": 3,
+    "totalPages": 3
   }
 }
 ```
@@ -243,14 +270,16 @@ http://ec2-52-59-208-61.eu-central-1.compute.amazonaws.com:8080/api/v1/users/
 
 ## searchByBirthDateRange
 
-http://ec2-52-59-208-61.eu-central-1.compute.amazonaws.com:8080/api/v1/users/search
+http://ec2-52-59-208-61.eu-central-1.compute.amazonaws.com:8080/api/v1/users/search?page=1&size=2&from=1987-04-24&to=2010-04-24
 
 - **Endpoint: /api/v1/users/search**
 - **Method:** GET
 - **Description:** Searches for users by birth date range.
 - **Parameters:**
-  --from: Start date of the birth date range.
-  --to: End date of the birth date range.
+    - page: Path variable representing the number of the page with users. If you do not specify parameters, by default, you should start browsing from page 0.
+    - size: Path variable representing the size of the page. If you do not specify parameters, the page size will be 4 by default.
+    - from: Start date of the birth date range.
+    - to: End date of the birth date range.
 - **Returns: List<User>** containing users within the specified birth date range.
 - **Logger Message:** Logs the search for users by birth date range.
 
@@ -261,42 +290,51 @@ http://ec2-52-59-208-61.eu-central-1.compute.amazonaws.com:8080/api/v1/users/sea
   "data": {
     "links": [
       {
-        "rel": "showAllUsers",
-        "href": "http://localhost:8080/api/v1/users"
+        "rel": "next",
+        "href": "http://localhost:8080/api/v1/users?page=2&size=2&from=1987-04-24&to=2010-04-24"
+      },
+      {
+        "rel": "previous",
+        "href": "http://localhost:8080/api/v1/users?page=0&size=2&from=1987-04-24&to=2010-04-24"
       }
     ],
     "content": [
       {
-        "id": 1,
-        "firstName": "Ronald",
+        "id": 5,
+        "firstName": "Conald",
         "lastName": "Serous",
-        "email": "sewewt@code.com",
-        "birthDate": "2000-04-10",
+        "email": "sewewtjh@code.com",
+        "birthDate": "1990-04-10",
         "address": "2194 Richmond Terrace Staten Island, NY  10302",
         "phoneNumber": "+130020050002",
         "links": [
           {
             "rel": "self",
-            "href": "http://localhost:8080/api/v1/users/1"
+            "href": "http://localhost:8080/api/v1/users/5"
           }
         ]
       },
       {
-        "id": 2,
-        "firstName": "Ronald",
+        "id": 6,
+        "firstName": "Donald",
         "lastName": "Serous",
-        "email": "sewewtw@code.com",
-        "birthDate": "2000-04-10",
+        "email": "sewewtkj@code.com",
+        "birthDate": "1990-04-10",
         "address": "2194 Richmond Terrace Staten Island, NY  10302",
         "phoneNumber": "+130020050002",
         "links": [
           {
             "rel": "self",
-            "href": "http://localhost:8080/api/v1/users/2"
+            "href": "http://localhost:8080/api/v1/users/6"
           }
         ]
       }
     ]
+  },
+  "pagination": {
+    "page": 1,
+    "size": 2,
+    "totalPages": 3
   }
 }
 ```

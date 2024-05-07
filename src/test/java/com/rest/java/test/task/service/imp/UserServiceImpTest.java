@@ -11,6 +11,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
@@ -133,11 +136,12 @@ class UserServiceImpTest {
                 .phoneNumber("+130020050022")
                 .build();
 
-        List<User> userList = List.of(user, userSecond);
+        List<User> createUserList = List.of(user, userSecond);
+        Page<User> userPage = new PageImpl<>(createUserList);
+        when(userRepository.findAll(any(Pageable.class))).thenReturn(userPage);
 
-        when(userRepository.findAll()).thenReturn(userList);
-
-        List<User> userListFromDB = usersServiceImp.findAll();
+        Page<User> userList = usersServiceImp.findAll(0, 10);
+        List<User> userListFromDB = userList.getContent();
 
         assertAll(
                 () -> assertNotNull(userListFromDB),
@@ -147,7 +151,7 @@ class UserServiceImpTest {
                 () -> assertTrue(userListFromDB.contains(userSecond))
         );
 
-        verify(userRepository, times(1)).findAll();
+        verify(userRepository, times(1)).findAll(any(Pageable.class));
     }
 
     @Test
@@ -207,15 +211,15 @@ class UserServiceImpTest {
                 .phoneNumber("+130020050022")
                 .build();
 
-        List<User> userList = List.of(user, userSecond);
+        List<User> creatUserList = List.of(user, userSecond);
 
         String rangFrom = "1999-03-17";
         String rangTo = "2010-06-20";
+        Page<User> userPage = new PageImpl<>(creatUserList);
+        when(userRepository.searchByBirthDateRange(any(Pageable.class), any(), any())).thenReturn(userPage);
 
-        when(userRepository.searchByBirthDateRange(any(), any())).thenReturn(userList);
-
-        List<User> userListFromDB = usersServiceImp.searchByBirthDateRange(rangFrom, rangTo);
-
+        Page<User> userList = usersServiceImp.searchByBirthDateRange(0, 10, rangFrom, rangTo);
+        List<User> userListFromDB = userList.getContent();
         assertAll(
                 () -> assertNotNull(userListFromDB),
                 () -> assertFalse(userListFromDB.isEmpty()),
@@ -224,7 +228,7 @@ class UserServiceImpTest {
                 () -> assertTrue(userListFromDB.contains(userSecond))
         );
 
-        verify(userRepository, times(1)).searchByBirthDateRange(any(), any());
+        verify(userRepository, times(1)).searchByBirthDateRange(any(Pageable.class), any(), any());
 
     }
 
@@ -237,13 +241,13 @@ class UserServiceImpTest {
         String rangTo = "1999-03-17";
 
         UserException errorBirthDateIsEmpty = assertThrows(UserException.class,
-                () -> usersServiceImp.searchByBirthDateRange(null, null));
+                () -> usersServiceImp.searchByBirthDateRange(0, 10, null, null));
 
         assertEquals("Birth Date is empty.", errorBirthDateIsEmpty.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, errorBirthDateIsEmpty.getHttpStatus());
 
         UserException errorRangFromIsBefore = assertThrows(UserException.class,
-                () -> usersServiceImp.searchByBirthDateRange(rangFrom, rangTo));
+                () -> usersServiceImp.searchByBirthDateRange(0, 10, rangFrom, rangTo));
 
         assertEquals("Birth Date range is wrong. Write correct rang.", errorRangFromIsBefore.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, errorRangFromIsBefore.getHttpStatus());
@@ -252,7 +256,7 @@ class UserServiceImpTest {
         String rangToNow = currenData.plusYears(1).toString();
 
         UserException errorRangNowIsBefore = assertThrows(UserException.class,
-                () -> usersServiceImp.searchByBirthDateRange(rangFromNow, rangToNow));
+                () -> usersServiceImp.searchByBirthDateRange(0, 10, rangFromNow, rangToNow));
 
         assertEquals("Birth Date range is wrong. Write correct rang.", errorRangNowIsBefore.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, errorRangNowIsBefore.getHttpStatus());

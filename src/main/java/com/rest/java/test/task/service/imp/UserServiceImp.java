@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,12 @@ public class UserServiceImp implements UserService {
     Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserRepository userRepository;
+
+    @Value("${default.page.number}")
+    private int defaultPageNumber;
+
+    @Value("${default.page.size}")
+    private int defaultPageSize;
 
     @Value("${min.user.age}")
     private Integer minAge;
@@ -111,8 +119,9 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public List<User> findAll() {
-        List<User> userList = userRepository.findAll();
+    public Page<User> findAll(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<User> userList = userRepository.findAll(pageRequest);
 
         logger.info("From UserServiceImp method -findAll- return List of User .");
         return userList;
@@ -158,7 +167,10 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public List<User> searchByBirthDateRange(String from, String to) {
+    public Page<User> searchByBirthDateRange(int page,
+                                             int size,
+                                             String from,
+                                             String to) {
         if (from != null && to != null) {
             LocalDate currenData = LocalDate.now();
             LocalDate dateFrom = LocalDate.parse(from);
@@ -166,7 +178,8 @@ public class UserServiceImp implements UserService {
             boolean validationWithCurrentDate = dateFrom.isBefore(currenData) && dateTo.isBefore(currenData);
             boolean validationFromTo = dateFrom.isBefore(dateTo);
             if (validationWithCurrentDate && validationFromTo) {
-                List<User> userList = userRepository.searchByBirthDateRange(dateFrom, dateTo);
+                PageRequest pageRequest = PageRequest.of(page, size);
+                Page<User> userList = userRepository.searchByBirthDateRange(pageRequest, dateFrom, dateTo);
                 logger.info("From UserServiceImp method -searchByBirthDateRange- return List of Users.");
                 return userList;
             } else {
@@ -181,35 +194,73 @@ public class UserServiceImp implements UserService {
         }
     }
 
-
     public Integer getMinAge() {
         return minAge;
     }
 
     @Override
-    public CollectionModel<User> addLinksCollectionModel(List<User> usersList) {
+    public CollectionModel<User> addLinksCollectionModel(Page<User> usersList, int page, int size) {
 
-        List<User> usersWhitLink = usersList.stream().map(user -> {
+        List<User> usersWhitLink = usersList.getContent().stream().map(user -> {
                     Link selfLink = linkTo(UserController.class).slash(user.getId()).withSelfRel();
                     user.add(selfLink);
                     return user;
                 }
 
         ).collect(Collectors.toList());
-        Link link = linkTo(UserController.class).withRel("showAllUsers");
+        CollectionModel<User> result = CollectionModel.of(usersWhitLink);
+        if (usersList.hasNext()) {
+            int nextPage = page + 1;
+            Link linkNext = linkTo(methodOn(UserController.class).showAllUsers(nextPage, size)).withRel("next");
+            result.add(linkNext);
+        }
+        if (usersList.hasPrevious()) {
+            int previousPage = page - 1;
+            Link linkPrevious = linkTo(methodOn(UserController.class).showAllUsers(previousPage, size)).withRel("previous");
+            result.add(linkPrevious);
+        }
 
-        CollectionModel<User> result = CollectionModel.of(usersWhitLink, link);
+        logger.info("From UserServiceImp method -addLinksCollectionModel- return List of Users with links.");
+        return result;
+    }
+    @Override
+    public CollectionModel<User> addLinksCollectionModelSearch(Page<User> usersList,
+                                                               int page,
+                                                               int size,
+                                                               String from,
+                                                               String to) {
+
+        List<User> usersWhitLink = usersList.getContent().stream().map(user -> {
+                    Link selfLink = linkTo(UserController.class).slash(user.getId()).withSelfRel();
+                    user.add(selfLink);
+                    return user;
+                }
+
+        ).collect(Collectors.toList());
+        CollectionModel<User> result = CollectionModel.of(usersWhitLink);
+        if (usersList.hasNext()) {
+            int nextPage = page + 1;
+            Link linkNext = linkTo(methodOn(UserController.class).searchByBirthDateRange(nextPage, size, from, to)).withRel("next");
+            result.add(linkNext);
+        }
+        if (usersList.hasPrevious()) {
+            int previousPage = page - 1;
+            Link linkPrevious = linkTo(methodOn(UserController.class).searchByBirthDateRange(previousPage, size, from, to)).withRel("previous");
+            result.add(linkPrevious);
+        }
+
         logger.info("From UserServiceImp method -addLinksCollectionModel- return List of Users with links.");
         return result;
     }
 
     @Override
     public void addLinksToEntityModel(User user) {
+
         Link linkSelf = linkTo(methodOn(UserController.class)
                 .getUserById(user.getId())).withSelfRel();
         user.add(linkSelf);
         Link linkAllUsers = linkTo(methodOn(UserController.class)
-                .showAllUsers()).withRel("allUsers");
+                .showAllUsers(defaultPageNumber, defaultPageSize)).withRel("allUsers");
         user.add(linkAllUsers);
         logger.info("From UserServiceImp method -addLinksToEntityModel- add Links to User.");
     }

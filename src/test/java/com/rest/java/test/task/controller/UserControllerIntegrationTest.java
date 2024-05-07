@@ -91,7 +91,10 @@ class UserControllerIntegrationTest {
         userRepository.save(user);
         userRepository.save(userSecond);
 
-        mvc.perform(get("/api/v1/users"))
+        mvc.perform(get("/api/v1/users")
+
+                        .param("page","0")
+                        .param("size","2"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.content", hasSize(2)))
@@ -218,6 +221,8 @@ class UserControllerIntegrationTest {
         String rangTo = "2010-06-20";
 
         mvc.perform(get("/api/v1/users/search")
+                        .param("page","0")
+                        .param("size","2")
                         .param("from", rangFrom)
                         .param("to", rangTo))
                 .andExpect(status().isOk())
@@ -240,12 +245,16 @@ class UserControllerIntegrationTest {
         String wrongRangToNow = currenData.plusYears(1).toString();
 
         mvc.perform(get("/api/v1/users/search")
+                        .param("page","0")
+                        .param("size","2")
                         .param("from", wrongRangFrom)
                         .param("to", wrongRangTo))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.message").value("Birth Date range is wrong. Write correct rang."));
 
         mvc.perform(get("/api/v1/users/search")
+                        .param("page","0")
+                        .param("size","2")
                         .param("from", wrongRangFromNow)
                         .param("to", wrongRangToNow))
                 .andExpect(status().isBadRequest())

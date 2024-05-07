@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
@@ -124,9 +126,9 @@ class UserRepositoryIntegrationTest {
 
         entityManager.persist(user);
         entityManager.persist(userSecond);
-
-        List<User> customerList = userRepository.searchByBirthDateRange(rangFrom, rangTo);
-
+        PageRequest pageRequest = PageRequest.of( 0,  10);
+        Page<User> userList = userRepository.searchByBirthDateRange(pageRequest,rangFrom, rangTo);
+        List<User> customerList = userList.getContent();
         assertAll(
                 () -> assertNotNull(customerList),
                 () -> assertThat(customerList.size()).isEqualTo(2),
